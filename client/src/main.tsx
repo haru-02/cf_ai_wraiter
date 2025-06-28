@@ -13,7 +13,7 @@ createRoot(document.getElementById("root")!).render(
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <div className="flex flex-col min-h-screen w-full">
           <Header />
-          <main className="flex-1 flex flex-col items-center px-4 pt-10 xl:px-8 min-h-0">
+          <main className="flex flex-1 justify-evenly items-center flex-row px-4 pt-10 xl:px-8 min-h-0">
             <App />
           </main>
         </div>

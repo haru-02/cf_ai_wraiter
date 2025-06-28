@@ -35,7 +35,7 @@ function Writer() {
 
   return (
     <div
-      className="w-1/2 max-w-4xl mx-auto h-[calc(85vh-2rem)] flex flex-col bg-popover text-foreground p-6 rounded-lg border-xl mb-6"
+      className="mx-auto h-[calc(85vh-2rem)] flex flex-col bg-popover text-foreground p-6 rounded-lg border-xl mb-6"
       style={{ boxShadow: shadow }}
     >
       <h2 className="text-2xl font-bold mb-4">filename</h2>
@@ -102,7 +102,7 @@ function Writer() {
       )}
 
       {/* The Tiptap editor itself */}
-      <div className="tiptap-editor-wrapper flex-1 min-h-0 overflow-y-auto border border-border rounded-md shadow-inner bg-background-secondary">
+      <div className="tiptap-editor-wrapper flex-1 min-h-0 overflow-y-auto border border-border rounded-md shadow-inner bg-muted">
         <EditorContent
           editor={editor}
           className="flex-1 min-h-0 overflow-auto"
