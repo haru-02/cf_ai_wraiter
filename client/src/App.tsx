@@ -1,5 +1,11 @@
+import Writer from "./components/Writer";
+
 function App() {
-  return <div>the body</div>;
+  return (
+    <>
+      <Writer />
+    </>
+  );
 }
 
 export default App;
