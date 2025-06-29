@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 function Writer() {
   const editor = useEditor({
     extensions: [starterKit],
-    content: "<p> start writing...</p>",
+    content: "<p> start writing ...</p>",
     editorProps: {
       attributes: {
         class:
@@ -35,14 +35,14 @@ function Writer() {
 
   return (
     <div
-      className="mx-auto h-[calc(85vh-2rem)] flex flex-col bg-popover text-foreground p-6 rounded-lg border-xl mb-6"
+      className="mx-auto h-[calc(85vh-2rem)] flex flex-col w-full bg-popover text-foreground p-6 rounded-lg mb-6"
       style={{ boxShadow: shadow }}
     >
       <h2 className="text-2xl font-bold mb-4">filename</h2>
 
       {/* Basic toolbar for common actions */}
       {editor && (
-        <div className="mb-4 p-2 bg-muted rounded-md border flex flex-wrap gap-2">
+        <div className="mb-4 p-2 bg-popover flex flex-wrap gap-2">
           <Button
             onClick={() => editor.chain().focus().toggleBold().run()}
             disabled={!editor.can().chain().focus().toggleBold().run()}
