@@ -8,6 +8,7 @@
     "dev": "bun --watch run src/index.ts && tsc --watch"
   },
   "dependencies": {
+    "@cloudflare/ai": "^1.2.2",
     "hono": "^4.7.11",
     "shared": "workspace:*"
   },
