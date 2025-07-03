@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "build": "tsc && bun run cf-typegen"
   },
   "dependencies": {
     "hono": "^4.8.3"
