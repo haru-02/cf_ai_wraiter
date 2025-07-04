@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface MessageProps {
   role: "user" | "ai";
@@ -32,7 +33,9 @@ const Message: React.FC<MessageProps> = ({
             <span>Thinking...</span>
           </div>
         ) : (
-          <p className="text-sm break-words">{content}</p>
+          <div className="text-sm break-words">
+            <ReactMarkdown>{content}</ReactMarkdown>
+          </div>
         )}
       </div>
     </div>

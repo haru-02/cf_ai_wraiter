@@ -50,7 +50,10 @@ function AiChat({ context }: { context?: string }) {
           ...prevMessages.slice(0, -1),
           {
             role: "ai",
-            content: data.result ?? data.response ?? JSON.stringify(data),
+            content:
+              data.result ??
+              data.response ??
+              JSON.stringify(data).replace(/\n(?=\d+\.)/g, "\n\n"),
           },
         ]);
       } catch (error) {
