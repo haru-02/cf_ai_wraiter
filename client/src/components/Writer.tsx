@@ -4,12 +4,16 @@ import starterKit from "@tiptap/starter-kit";
 import { shadow } from "@/styles/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 function Writer({
   onContentChange,
 }: {
   onContentChange: (content: string) => void;
 }) {
+  const [filename, setFilename] = useState("untitled");
+  const [saving, setSaving] = useState(false);
+
   const editor = useEditor({
     extensions: [starterKit],
     content: "write here...",
@@ -24,6 +28,32 @@ function Writer({
     },
   });
 
+  const handleSave = async () => {
+    if (!editor) return;
+    setSaving(true);
+    const content = editor.getHTML(); // or getText() for plain text, getMarkdown() if you have a markdown extension
+    try {
+      const res = await fetch("http://localhost:8787/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: filename,
+          content,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Optionally show a toast or notification
+        toast("File saved!");
+      } else {
+        toast(data.error || "Failed to save file.");
+      }
+    } catch (e) {
+      toast("Failed to save file.");
+    } finally {
+      setSaving(false);
+    }
+  };
   // not really sure if this is needed, but ill keep it here for now,
   // mickey mouse voice : "it is a suprise tool that will help us later !"
   //   const handleGetContent = () => {
@@ -37,7 +67,6 @@ function Writer({
   //     // for now, this is just a log.
   //     // if you need this as markdown, use the turndown library to convert it. not included rn.
   //   };
-  const [filename, setFilename] = useState("untitled");
   // gonna be used to set the filename of the document
 
   return (
@@ -55,9 +84,11 @@ function Writer({
         />
         <Button
           variant="default"
+          onClick={handleSave}
+          disabled={saving}
           className="bg-green-600 hover:bg-green-700 text-white font-semibold shadow"
         >
-          Save
+          {saving ? "Saving..." : "Save"}
         </Button>
       </div>
 

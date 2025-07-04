@@ -5,8 +5,20 @@ declare class Ai {
   run(model: string, options: any): Promise<any>;
 }
 
+declare class D1Database {
+  prepare(query: string): {
+    bind(...values: any[]): {
+      run(): Promise<any>;
+      all(): Promise<any>;
+      first(): Promise<any>;
+      raw(): Promise<any>;
+    };
+  };
+}
+
 interface CustomEnv extends Env {
   AI: Ai;
+  DB: D1Database;
 }
 
 const app = new Hono<CustomEnv>();
@@ -58,11 +70,49 @@ app.post("/aichat", async (c) => {
   }
 });
 
+app.post("/save", async (c) => {
+  const { title, content } = await c.req.json<{
+    title: string;
+    content: string;
+  }>();
+  if (!title || !content) {
+    return c.json({ error: "Title and content are required" }, 400);
+  }
+
+  const env = c.env as CustomEnv;
+  if (!env || !env.DB) {
+    return c.json({ error: "DB environment is not available" }, 500);
+  }
+
+  const db = env.DB;
+  try {
+    await db
+      .prepare(
+        `INSERT INTO files (title, content) VALUES (?, ?)
+       ON CONFLICT(title) DO UPDATE SET content=excluded.content`
+      )
+      .bind(title, content)
+      .run();
+
+    return c.json({ success: true });
+  } catch (error) {
+    console.error("D1 insert error:", error);
+    return c.json({ error: "Failed to save file" }, 500);
+  }
+});
+
 app.options("/aichat", (c) => {
   c.header("Access-Control-Allow-Origin", "http://localhost:5173");
   c.header("Access-Control-Allow-Methods", "POST, OPTIONS");
   c.header("Access-Control-Allow-Headers", "Content-Type");
   return c.text("");
+});
+
+app.options("/save", (c) => {
+  c.header("Access-Control-Allow-Origin", "http://localhost:5173");
+  c.header("Access-Control-Allow-Methods", "POST, OPTIONS");
+  c.header("Access-Control-Allow-Headers", "Content-Type");
+  return c.text("", 200);
 });
 
 export default app;
