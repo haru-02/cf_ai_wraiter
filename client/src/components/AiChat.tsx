@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 import Message from "./ui/Message";
 import { shadow } from "@/styles/utils";
 
-function AiChat() {
+function AiChat({ context }: { context?: string }) {
   interface MessageType {
     role: "ai" | "user";
     content: string;
@@ -14,7 +14,11 @@ function AiChat() {
   }
 
   const [messages, setMessages] = useState<MessageType[]>([
-    { role: "ai", content: "Hello! How can I assist you today?" },
+    {
+      role: "ai",
+      content:
+        'Hi, happy to assist your work today! If you want me to take the text on writer as context, just include "@writer" in your prompt!',
+    },
   ]);
 
   const [inputMessage, setInputMessage] = useState("");
@@ -29,11 +33,17 @@ function AiChat() {
       const currentPrompt = inputMessage.trim();
       setInputMessage(""); // Clear input
 
+      // pass the writer content as context only if the user specifies it with @writer in prompt.
+      const shouldIncludeContext = currentPrompt.includes("@writer");
+      const payload = shouldIncludeContext
+        ? { prompt: currentPrompt, context }
+        : { prompt: currentPrompt, context: "" };
+
       try {
         const res = await fetch("http://localhost:8787/aichat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: currentPrompt }),
+          body: JSON.stringify(payload),
         });
         const data = await res.json();
         setMessages((prevMessages) => [

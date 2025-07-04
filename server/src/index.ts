@@ -25,7 +25,10 @@ app.get("/", (c) => {
 
 app.post("/aichat", async (c) => {
   try {
-    const { prompt } = await c.req.json<{ prompt: string }>();
+    const { prompt, context = "" } = await c.req.json<{
+      prompt: string;
+      context?: string;
+    }>();
     if (!prompt) {
       return c.json({ error: "Prompt is required" }, 400);
     }
@@ -35,8 +38,16 @@ app.post("/aichat", async (c) => {
       return c.json({ error: "AI environment is not available" }, 500);
     }
 
+    // Only include context if it's not empty
+    const messages = context.trim()
+      ? [
+          { role: "system", content: context },
+          { role: "user", content: prompt },
+        ]
+      : [{ role: "user", content: prompt }];
+
     const response = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
-      prompt,
+      messages,
     });
 
     // Hono's c.json() automatically sets the Content-Type to application/json

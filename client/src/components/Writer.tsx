@@ -1,22 +1,27 @@
-import { shadow } from "@/styles/utils";
+import { useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import starterKit from "@tiptap/starter-kit";
-import { Button } from "./ui/button";
+import { shadow } from "@/styles/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-function Writer() {
+function Writer({
+  onContentChange,
+}: {
+  onContentChange: (content: string) => void;
+}) {
   const editor = useEditor({
     extensions: [starterKit],
-    content: "<p> start writing ...</p>",
+    content: "write here...",
     editorProps: {
       attributes: {
         class:
           "prose prose-blue dark:prose-invert max-w-none focus:outline-none min-h-[150px] p-2",
       },
     },
-    // onUpdate: ({ editor }) => {
-    //   // use this part to get instant updates on what the user is writing
-    //   // this is useful when you wanna autosave or do ai stuff with it using cloudflare workers.
-    // },
+    onUpdate: ({ editor }) => {
+      onContentChange(editor.getText());
+    },
   });
 
   // not really sure if this is needed, but ill keep it here for now,
@@ -32,13 +37,29 @@ function Writer() {
   //     // for now, this is just a log.
   //     // if you need this as markdown, use the turndown library to convert it. not included rn.
   //   };
+  const [filename, setFilename] = useState("untitled");
+  // gonna be used to set the filename of the document
 
   return (
     <div
       className="mx-auto h-[calc(85vh-2rem)] flex flex-col w-full bg-popover text-foreground p-6 rounded-lg mb-6"
       style={{ boxShadow: shadow }}
     >
-      <h2 className="text-2xl font-bold mb-4">filename</h2>
+      <div className="flex gap-2">
+        <Input
+          type="text"
+          value={filename}
+          onChange={(e) => setFilename(e.target.value)}
+          className="font-bold mb-4 bg-transparent border-none outline-none w-full"
+          placeholder="Untitled"
+        />
+        <Button
+          variant="default"
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold shadow"
+        >
+          Save
+        </Button>
+      </div>
 
       {/* Basic toolbar for common actions */}
       {editor && (
