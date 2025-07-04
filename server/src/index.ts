@@ -35,6 +35,51 @@ app.get("/", (c) => {
   return c.text("Hello hono!");
 });
 
+app.get("/files", async (c) => {
+  const env = c.env as CustomEnv;
+  if (!env || !env.DB) {
+    return c.json({ error: "DB environment is not available" }, 500);
+  }
+  const db = env.DB;
+  try {
+    const result = await db
+      .prepare(
+        "SELECT id, title, created_at FROM files ORDER BY created_at DESC"
+      )
+      .bind()
+      .all();
+    return c.json({ files: result.results });
+  } catch (error) {
+    console.error("D1 select error:", error);
+    return c.json({ error: "Failed to fetch files" }, 500);
+  }
+});
+
+app.get("/file/:title", async (c) => {
+  const env = c.env as CustomEnv;
+  if (!env || !env.DB) {
+    return c.json({ error: "DB environment is not available" }, 500);
+  }
+  const db = env.DB;
+  // Decode the title from the URL parameter
+  const title = decodeURIComponent(c.req.param("title"));
+  try {
+    const result = await db
+      .prepare(
+        "SELECT id, title, content, created_at FROM files WHERE title = ?"
+      )
+      .bind(title)
+      .first(); // Use .first() to get a single row
+    if (!result) {
+      return c.json({ error: "File not found" }, 404);
+    }
+    return c.json({ file: result });
+  } catch (error) {
+    console.error("D1 select error:", error);
+    return c.json({ error: "Failed to fetch file by title" }, 500);
+  }
+});
+
 app.post("/aichat", async (c) => {
   try {
     const { prompt, context = "" } = await c.req.json<{
@@ -99,6 +144,20 @@ app.post("/save", async (c) => {
     console.error("D1 insert error:", error);
     return c.json({ error: "Failed to save file" }, 500);
   }
+});
+
+app.options("/files", (c) => {
+  c.header("Access-Control-Allow-Origin", "http://localhost:5173");
+  c.header("Access-Control-Allow-Methods", "GET, OPTIONS");
+  c.header("Access-Control-Allow-Headers", "Content-Type");
+  return c.text("", 200);
+});
+
+app.options("/file/:title", (c) => {
+  c.header("Access-Control-Allow-Origin", "http://localhost:5173");
+  c.header("Access-Control-Allow-Methods", "GET, OPTIONS");
+  c.header("Access-Control-Allow-Headers", "Content-Type");
+  return c.text("", 200);
 });
 
 app.options("/aichat", (c) => {
