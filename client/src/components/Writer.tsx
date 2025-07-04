@@ -79,7 +79,7 @@ function Writer({
     }
 
     try {
-      const res = await fetch("http://localhost:8787/save", {
+      const res = await fetch("http://localhost:8787/files", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -13,13 +13,17 @@ type FileMeta = {
   created_at: string;
 };
 
+interface AppSidebarProps {
+  files: FileMeta[];
+  onSelectFile: (id: number) => void;
+  onDeleteFile: (title: string) => void; // New prop
+}
+
 export function AppSidebar({
   files,
   onSelectFile,
-}: {
-  files: FileMeta[];
-  onSelectFile: (id: number) => void;
-}) {
+  onDeleteFile,
+}: AppSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -30,7 +34,11 @@ export function AppSidebar({
         </h1>
       </SidebarHeader>
       <SidebarContent>
-        <FileBar files={files} onSelect={onSelectFile} />
+        <FileBar
+          files={files}
+          onSelect={onSelectFile}
+          onDeleteFile={onDeleteFile}
+        />
       </SidebarContent>
       <SidebarFooter />
     </Sidebar>

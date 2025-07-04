@@ -3,6 +3,7 @@ import AiChat from "./components/AiChat";
 import { useState, useEffect, useCallback } from "react";
 import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { toast } from "sonner";
 
 type FileMeta = {
   id: number;
@@ -51,7 +52,7 @@ function App() {
 
         if (selectedFile) {
           const res = await fetch(
-            `http://localhost:8787/file/${encodeURIComponent(
+            `http://localhost:8787/files/${encodeURIComponent(
               selectedFile.title
             )}`
           );
@@ -93,9 +94,44 @@ function App() {
     fetchAllFiles();
   };
 
+  const handleDeleteFile = async (title: string) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8787/files/${encodeURIComponent(title)}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message || `File '${title}' deleted.`);
+        fetchAllFiles(); // Re-fetch files to update the sidebar
+        // If the deleted file was currently selected, deselect it
+        const currentSelectedFile = files.find((f) => f.id === selectedFileId);
+        if (currentSelectedFile && currentSelectedFile.title === title) {
+          setSelectedFileId(null); // Deselect the file
+          setWriterContent("write here..."); // Reset writer content
+          setSelectedFilename("untitled"); // Reset filename
+        }
+      } else {
+        toast.error(data.error || "Failed to delete file.");
+      }
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      toast.error("Failed to delete file. Network error.");
+    }
+  };
+
   return (
     <SidebarProvider className="flex flex-1 w-full gap-6 flex-col md:flex-row justify-evenly">
-      <AppSidebar files={files} onSelectFile={handleSelectFile} />
+      <AppSidebar
+        files={files}
+        onSelectFile={handleSelectFile}
+        onDeleteFile={handleDeleteFile}
+      />
       <SidebarTrigger />
       <div className="flex-1 flex min-h-0">
         <Writer
