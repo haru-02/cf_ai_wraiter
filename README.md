@@ -10,7 +10,7 @@ While there are plenty of existing app building stacks out there, many of them a
 ## Features
 
 - **Rich text editor** \- one that provides various styling options for your notes.
-- **Save** \- save your notes across sessions.
+- **Save/delete** \- save/delete your notes across sessions.
 - **AI** \- with the ollama model from meta, get the cutting edge help you need with your content.
 - **pass context** \- pass your written text as context by including @writer in your prompt.
 
