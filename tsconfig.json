@@ -36,7 +36,5 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  },
-  "include": [],
-  "exclude": ["node_modules", "dist"]
+  }
 }
