@@ -6,7 +6,7 @@ function Header() {
     <header className="relative flex h-24 w-full items-center justify-between bg-secondary rounded px-3 sm:px-8">
       <Link className="flex items-end gap-2" to="/">
         <img
-          src="/src/assets/favicon.ico"
+          src="../2877073.png"
           alt="Wratier logo"
           height={40}
           width={40}

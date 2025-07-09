@@ -13,6 +13,8 @@ function AiChat({ context }: { context?: string }) {
     isLoading?: boolean;
   }
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [messages, setMessages] = useState<MessageType[]>([
     {
       role: "ai",
@@ -40,7 +42,7 @@ function AiChat({ context }: { context?: string }) {
         : { prompt: currentPrompt, context: "" };
 
       try {
-        const res = await fetch("http://localhost:8787/aichat", {
+        const res = await fetch(`${API_URL}/aichat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

@@ -19,6 +19,8 @@ interface WriterProps {
   selectedFileId: number | null; // The ID of the currently selected file (useful for distinguishing new vs. existing saves)
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function Writer({
   content,
   onContentChange,
@@ -79,7 +81,7 @@ function Writer({
     }
 
     try {
-      const res = await fetch("http://localhost:8787/files", {
+      const res = await fetch(`${API_URL}/files`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -154,45 +156,6 @@ function Writer({
             className="px-3 py-1 text-sm font-medium transition-colors duration-200"
           >
             Strike
-          </Button>
-          <Button
-            onClick={() => editor.chain().focus().setParagraph().run()}
-            disabled={loading}
-            className="px-3 py-1 text-sm font-medium transition-colors duration-200"
-          >
-            Paragraph
-          </Button>
-          <Button
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 1 }).run()
-            }
-            disabled={loading}
-            className="px-3 py-1 text-sm font-medium transition-colors duration-200"
-          >
-            H1
-          </Button>
-          <Button
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 2 }).run()
-            }
-            disabled={loading}
-            className="px-3 py-1 text-sm font-medium transition-colors duration-200"
-          >
-            H2
-          </Button>
-          <Button
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            disabled={loading}
-            className="px-3 py-1 text-sm font-medium transition-colors duration-200"
-          >
-            Bullet List
-          </Button>
-          <Button
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            disabled={loading}
-            className="px-3 py-1 text-sm font-medium transition-colors duration-200"
-          >
-            Ordered List
           </Button>
         </div>
       )}

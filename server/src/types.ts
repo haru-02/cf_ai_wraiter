@@ -18,4 +18,5 @@ declare class D1Database {
 export interface CustomEnv extends Env {
   AI: Ai;
   DB: D1Database;
+  FRONTEND: string; // The URL of the frontend application
 }

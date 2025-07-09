@@ -11,6 +11,8 @@ type FileMeta = {
   created_at: string;
 };
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
   const [files, setFiles] = useState<FileMeta[]>([]);
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
@@ -20,7 +22,7 @@ function App() {
 
   const fetchAllFiles = useCallback(async () => {
     try {
-      const res = await fetch("http://localhost:8787/files");
+      const res = await fetch(`${API_URL}/files`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -52,9 +54,7 @@ function App() {
 
         if (selectedFile) {
           const res = await fetch(
-            `http://localhost:8787/files/${encodeURIComponent(
-              selectedFile.title
-            )}`
+            `${API_URL}/files/${encodeURIComponent(selectedFile.title)}`
           );
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -96,12 +96,9 @@ function App() {
 
   const handleDeleteFile = async (title: string) => {
     try {
-      const res = await fetch(
-        `http://localhost:8787/files/${encodeURIComponent(title)}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const res = await fetch(`${API_URL}/files/${encodeURIComponent(title)}`, {
+        method: "DELETE",
+      });
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }

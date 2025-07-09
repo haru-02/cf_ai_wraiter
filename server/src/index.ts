@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import type { CustomEnv } from "./types";
 
@@ -11,8 +11,13 @@ const app = new Hono<CustomEnv>();
 // It automatically handles OPTIONS preflights and sets headers for all other methods.
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Include all methods you use
+    origin: (originString: string, c: Context<CustomEnv>) => {
+      const envTyped = c.env as CustomEnv;
+      return envTyped.FRONTEND;
+      // there is some issue here with the ide not recognising the type of env as customenv. not sure why this works.
+      //origin: (originString: string, c: Context<CustomEnv>) => c.env!.FRONTEND,
+    },
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type"],
     maxAge: 600,
   })
