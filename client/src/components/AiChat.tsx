@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { Separator } from "./ui/separator";
@@ -14,6 +14,7 @@ function AiChat({ context }: { context?: string }) {
   }
 
   const API_URL = import.meta.env.VITE_API_URL;
+  const scrollAreaRef = useRef<HTMLDivElement>(null); // Ref for auto-scrolling
 
   const [messages, setMessages] = useState<MessageType[]>([
     {
@@ -25,17 +26,39 @@ function AiChat({ context }: { context?: string }) {
 
   const [inputMessage, setInputMessage] = useState("");
 
+  // Effect to scroll to the bottom whenever messages change
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      );
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight;
+      }
+    }
+  }, [messages]);
+
   const handleSendMessage = async () => {
     if (inputMessage.trim()) {
+      const userMessage: MessageType = {
+        role: "user",
+        content: inputMessage.trim(),
+      };
+      const aiLoadingMessage: MessageType = {
+        role: "ai",
+        content: "",
+        isLoading: true,
+      };
+
+      // Add user message and a placeholder for AI response with loading state
       setMessages((prevMessages) => [
         ...prevMessages,
-        { role: "user", content: inputMessage.trim() },
-        { role: "ai", content: "", isLoading: true },
+        userMessage,
+        aiLoadingMessage,
       ]);
       const currentPrompt = inputMessage.trim();
-      setInputMessage(""); // Clear input
+      setInputMessage(""); // Clear input immediately
 
-      // pass the writer content as context only if the user specifies it with @writer in prompt.
       const shouldIncludeContext = currentPrompt.includes("@writer");
       const payload = shouldIncludeContext
         ? { prompt: currentPrompt, context }
@@ -47,57 +70,147 @@ function AiChat({ context }: { context?: string }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        const data = await res.json();
-        setMessages((prevMessages) => [
-          ...prevMessages.slice(0, -1),
-          {
-            role: "ai",
-            content:
-              data.result ??
-              data.response ??
-              JSON.stringify(data).replace(/\n(?=\d+\.)/g, "\n\n"),
-          },
-        ]);
-      } catch (error) {
-        setMessages((prevMessages) => [
-          ...prevMessages.slice(0, -1),
-          {
-            role: "ai",
-            content: "Sorry, there was an error contacting the AI.",
-          },
-        ]);
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Network response was not ok");
+        }
+
+        const reader = res.body?.getReader();
+        if (!reader) {
+          throw new Error("Failed to get readable stream from response.");
+        }
+
+        const decoder = new TextDecoder("utf-8");
+        let accumulatedContent = "";
+        let buffer = ""; // Buffer to handle partial lines from the stream
+
+        // Immediately update the last AI message to start streaming (remove isLoading)
+        setMessages((prevMessages) => {
+          const newMessages = [...prevMessages];
+          const lastAiMessageIndex = newMessages.length - 1;
+          if (newMessages[lastAiMessageIndex]?.isLoading) {
+            newMessages[lastAiMessageIndex] = {
+              ...newMessages[lastAiMessageIndex],
+              isLoading: false,
+              content: "", // Start with an empty string to append to
+            };
+          }
+          return newMessages;
+        });
+
+        let done = false;
+        while (!done) {
+          const { value, done: readerDone } = await reader.read();
+          done = readerDone;
+
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk; // Add the new chunk to the buffer
+
+          // Process complete lines from the buffer
+          let newlineIndex;
+          while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+            const line = buffer.substring(0, newlineIndex).trim();
+            buffer = buffer.substring(newlineIndex + 1);
+
+            if (line.startsWith("data:")) {
+              const jsonString = line.substring(5).trim();
+              if (jsonString === "[DONE]") {
+                done = true; // Signal completion if [DONE] is received
+                break; // Exit the inner while loop
+              }
+              try {
+                const parsedData = JSON.parse(jsonString);
+                // Check if 'response' field exists and is not null/undefined
+                if (
+                  parsedData.response !== null &&
+                  parsedData.response !== undefined
+                ) {
+                  accumulatedContent += parsedData.response;
+
+                  // Update React state with the new content
+                  setMessages((prevMessages) => {
+                    const updatedMessages = [...prevMessages];
+                    const lastAiMessageIndex = updatedMessages.length - 1;
+                    if (updatedMessages[lastAiMessageIndex]?.role === "ai") {
+                      updatedMessages[lastAiMessageIndex].content =
+                        accumulatedContent;
+                    }
+                    return updatedMessages;
+                  });
+                }
+                // Handle usage data if needed, though for streaming, it's typically just text
+                // if (parsedData.usage) { /* process usage info */ }
+              } catch (parseError) {
+                console.warn(
+                  "Failed to parse JSON from stream line:",
+                  jsonString,
+                  parseError
+                );
+                // This might happen for empty lines, or non-JSON messages, safe to ignore often.
+              }
+            }
+          }
+        }
+        // After the streaming loop finishes (either naturally or by [DONE])
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          const lastAiMessageIndex = updatedMessages.length - 1;
+          if (updatedMessages[lastAiMessageIndex]?.role === "ai") {
+            // Ensure isLoading is false and content is finalized
+            updatedMessages[lastAiMessageIndex].isLoading = false;
+          }
+          return updatedMessages;
+        });
+      } catch (error: any) {
+        // Type as 'any' for simpler error handling
+        console.error("Error fetching streamed AI response:", error);
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          const lastAiMessageIndex = updatedMessages.length - 1;
+          // If no content was streamed or it was still loading, show a full error message
+          if (
+            updatedMessages[lastAiMessageIndex]?.isLoading ||
+            updatedMessages[lastAiMessageIndex]?.content === ""
+          ) {
+            updatedMessages[lastAiMessageIndex] = {
+              role: "ai",
+              content: `Sorry, there was an error contacting the AI: ${
+                error.message || String(error)
+              }.`,
+              isLoading: false,
+            };
+          } else {
+            // If some content was already streamed, append an error message
+            updatedMessages[lastAiMessageIndex].content += `\n\n[Error: ${
+              error.message || String(error)
+            }]`;
+            updatedMessages[lastAiMessageIndex].isLoading = false; // Ensure loading is off
+          }
+          return updatedMessages;
+        });
       }
     }
   };
-
-  interface MessageType {
-    role: "ai" | "user";
-    content: string;
-    isLoading?: boolean;
-  }
 
   interface KeyPressEvent extends React.KeyboardEvent<HTMLInputElement> {}
 
   const handleKeyPress = (event: KeyPressEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
-      // Send on Enter, allow Shift+Enter for new line
       event.preventDefault(); // Prevent default Enter behavior (e.g., new line in textarea)
       handleSendMessage();
     }
   };
 
   return (
-    // Main container, occupying full height and centered horizontally
     <div
       className="mx-auto h-[calc(85vh-2rem)] flex flex-col w-full bg-popover text-foreground p-6 rounded-lg mb-6"
       style={{ boxShadow: shadow }}
     >
-      {/* Header */}
       <div className="pb-4 border-b border-border bg-card">
         <h1 className="text-xl font-semibold">Chat</h1>
       </div>
-      {/* Chat Messages Area */}
-      <ScrollArea className="flex-1 p-4 overflow-y-auto">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 overflow-y-auto">
         {messages.map((msg, index) => (
           <Message
             key={index}
@@ -107,15 +220,14 @@ function AiChat({ context }: { context?: string }) {
           />
         ))}
       </ScrollArea>
-      <Separator className="my-2" /> {/* Visual separator */}
-      {/* Message Input Area */}
+      <Separator className="my-2" />
       <div className="flex items-center p-4 pt-0 gap-2">
         <Input
           placeholder="Type your message here..."
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           onKeyDown={handleKeyPress}
-          className="flex-1 resize-none min-h-[40px] text-base" // Ensure it grows for longer input
+          className="flex-1 resize-none min-h-[40px] text-base"
         />
         <Button onClick={handleSendMessage} disabled={!inputMessage.trim()}>
           Send

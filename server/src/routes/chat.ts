@@ -1,23 +1,27 @@
 // src/routes/chat.ts
 import { Hono } from "hono";
-import type { CustomEnv } from "../types"; // Import CustomEnv
+import type { CustomEnv } from "../types";
 
-// Create a new Hono instance specifically for chat-related routes
 const chat = new Hono<{ Bindings: CustomEnv }>();
 
 chat.post("/", async (c) => {
   try {
+    console.log("Received chat request."); // Log start of request
+
     const { prompt, context = "" } = await c.req.json<{
       prompt: string;
       context?: string;
     }>();
+    console.log("Parsed request body:", { prompt, context }); // Log parsed data
+
     if (!prompt) {
+      console.error("Prompt is missing.");
       return c.json({ error: "Prompt is required" }, 400);
     }
 
-    const ai = c.env.AI; // Access AI from env
+    const ai = c.env.AI;
     if (!ai) {
-      // Optional: A more robust check for AI availability in the route
+      console.error("AI environment binding is missing.");
       return c.json({ error: "AI environment is not available for chat" }, 500);
     }
 
@@ -28,14 +32,28 @@ chat.post("/", async (c) => {
         ]
       : [{ role: "user", content: prompt }];
 
+    console.log("Messages prepared for AI:", messages); // Log messages before AI run
+
     const response = await ai.run("@cf/meta/llama-3.1-8b-instruct", {
       messages,
+      stream: true,
     });
 
-    return c.json(response);
-  } catch (error) {
-    console.error("Error running AI model:", error);
-    return c.json({ error: "Failed to get AI response" }, 500);
+    console.log("AI run successful, returning stream."); // Log success before streaming
+
+    return new Response(response as ReadableStream, {
+      headers: { "content-type": "text/event-stream" },
+    });
+  } catch (error: any) {
+    // Use 'any' for error type in catch to safely access properties
+    console.error("Error in AI model route:", error); // Log the actual error object
+    if (error.stack) {
+      console.error("Error stack:", error.stack); // Log stack trace for more details
+    }
+    return c.json(
+      { error: "Failed to get AI response", details: error.message },
+      500
+    );
   }
 });
 

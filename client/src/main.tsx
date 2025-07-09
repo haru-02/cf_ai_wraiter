@@ -10,11 +10,9 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-        <div className="flex flex-col min-h-screen w-full">
-          <main className="flex flex-1 justify-evenly items-center flex-row px-4 pt-10 xl:px-8 min-h-0">
-            <App />
-          </main>
-        </div>
+        <main className="flex flex-1 justify-evenly items-center flex-row px-4 xl:px-8 min-h-screen">
+          <App />
+        </main>
         <Toaster />
       </ThemeProvider>
     </BrowserRouter>

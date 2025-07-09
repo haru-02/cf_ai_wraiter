@@ -123,14 +123,14 @@ function App() {
   };
 
   return (
-    <SidebarProvider className="flex flex-1 w-full gap-6 flex-col md:flex-row justify-evenly">
+    <SidebarProvider className="flex flex-1 w-full gap-6 flex-col md:flex-row justify-evenly pt-10">
       <AppSidebar
         files={files}
         onSelectFile={handleSelectFile}
         onDeleteFile={handleDeleteFile}
       />
       <SidebarTrigger />
-      <div className="flex-1 flex min-h-0">
+      <div className="flex-1 flex min-h-0 pt-10">
         <Writer
           content={writerContent} // Pass the content to display
           onContentChange={handleWriterContentChange} // Pass callback for content changes
@@ -141,7 +141,7 @@ function App() {
           selectedFileId={selectedFileId} // Pass selected file ID for potential new file handling
         />
       </div>
-      <div className="flex-1 flex min-h-0">
+      <div className="flex-1 flex min-h-0 pt-10">
         <AiChat context={writerContent} />
       </div>
     </SidebarProvider>
