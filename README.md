@@ -27,11 +27,12 @@ While there are plenty of existing app building stacks out there, many of them a
 
 ```mermaid
 graph LR
-A(Cloudflare Workers AI) -->B(frontend chat)
+A(Cloudflare Workers AI Agent) -->B(hono backend)
 B --> A
-C(Writer content) --> B
-C --> D(Cloudflare D1 database)
-D --> C
+C(React Frontend) --> B
+C --> D(writer content)
+D --> B
+B --> E(D1 Database)
 ```
 
 ### Server
