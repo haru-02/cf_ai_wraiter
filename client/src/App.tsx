@@ -30,7 +30,7 @@ function App() {
       setFiles(data.files || []);
     } catch (error) {
       console.error("Failed to fetch files:", error);
-      // TODO: Display an error message to the user (e.g., using a toast)
+      toast.error("Failed to fetch files. Please try refreshing.");
     }
   }, []);
 
@@ -122,12 +122,19 @@ function App() {
     }
   };
 
+  const handleNewFile = () => {
+    setSelectedFileId(null);
+    setWriterContent("write here...");
+    setSelectedFilename("untitled");
+  };
+
   return (
     <SidebarProvider className="flex flex-1 w-full gap-6 flex-col md:flex-row justify-evenly pt-10">
       <AppSidebar
         files={files}
         onSelectFile={handleSelectFile}
         onDeleteFile={handleDeleteFile}
+        onNewFile={handleNewFile}
       />
       <SidebarTrigger />
       <div className="flex-1 flex min-h-0 pt-10">
