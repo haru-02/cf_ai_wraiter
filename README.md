@@ -26,14 +26,19 @@ While there are plenty of existing app building stacks out there, many of them a
 ```
 
 ```mermaid
-graph LR
-A(Cloudflare Workers AI Agent) -->B(hono backend)
-B --> A
-C(React Frontend) --> B
-C --> D(writer content)
-D --> B
-B --> E(D1 Database)
-```
+graph TB
+A[React Frontend] ----> B[AI Chat Interface]
+A ----> C[Text Editor]
+A ----> D[Side Bar]
+B <----> E[Hono Backend]
+C <----> E
+D <----> E
+E <----> F[Cloudflare Agents]
+F <----> G[Cloudflare AI]
+E <----> H[Cloudflare D1]
+A --hosted using--> I(Cloudflare Pages)
+E --hosted using--> J(Cloudflare Workers)
+``` 
 
 ### Server
 
