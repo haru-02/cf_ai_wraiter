@@ -3,6 +3,9 @@
 A full-stack BHVR AI assisted writing app.
 powered by cloudflare workers.
 
+Try it out [here](https://wraiter-9xs.pages.dev/) !
+Check out my dev log [here](https://gist.github.com/haru-02/6972304c66d2d416ec579b63e55c3ed0) to know how it was designed, and for a detailed documentation.
+
 ## Why bhvr?
 
 While there are plenty of existing app building stacks out there, many of them are either bloated, outdated, or have too much of a vendor lock-in. bhvr is built with the opinion that you should be able to deploy your client or server in any environment while also keeping type saftey. Also, I just wanted to try using hono for backend rather than following the MERN conventions which feels a bit restrictive, along with avoiding the few drawbacks that come with using npm.
