@@ -1,10 +1,14 @@
 # Wraiter
 
-A full-stack BHVR AI assisted writing app.
-powered by cloudflare workers.
+![Made with Cloudflare Workers](https://img.shields.io/badge/built%20with-Cloudflare%20Workers-blue)
+![BHVR Stack](https://img.shields.io/badge/stack-BHVR-orange)
+![Written in TypeScript](https://img.shields.io/badge/language-TypeScript-green)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Try it out [here](https://wraiter-9xs.pages.dev/) !
-Check out my dev log [here](https://gist.github.com/haru-02/6972304c66d2d416ec579b63e55c3ed0) to know how it was designed, and for a detailed documentation.
+## A full-stack BHVR AI assisted writing app.
+
+Try using the application [here.](https://wraiter-9xs.pages.dev/).
+Also, Check out my dev log [here](https://gist.github.com/haru-02/6972304c66d2d416ec579b63e55c3ed0) to know how it was designed, and for a detailed documentation.
 
 ## Why bhvr?
 
