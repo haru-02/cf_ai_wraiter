@@ -7,8 +7,8 @@
 
 ## A full-stack BHVR AI assisted writing app.
 
-Try the live demo [here.](https://wraiter-9xs.pages.dev/).
-Also, Check out my dev log [here](https://gist.github.com/haru-02/6972304c66d2d416ec579b63e55c3ed0) to know how it was designed, and for a detailed documentation.
+Try the live demo [here.](https://wraiter-9xs.pages.dev/).\
+Also, Check out my dev log [here](https://gist.github.com/haru-02/6972304c66d2d416ec579b63e55c3ed0) to know how it was designed, and for a detailed documentation.\
 
 <img width="1919" height="938" alt="image" src="https://github.com/user-attachments/assets/4ee98b99-a1b2-4a26-940c-373d92169015" />
 
